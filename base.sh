@@ -29,7 +29,7 @@ function base::setup_quiet_hours() {
 function base::load_quiet_hours() {
     local point
     for point in "quiet_start" "quiet_end"; do
-        point_upper=$(echo "$z" | tr '[:lower:]' '[:upper:]')
+        point_upper=$(echo "$point" | tr '[:lower:]' '[:upper:]')
         declare "$point_upper=$(jq -r ".${point}" "${ROOT}/quiet_hours.json")"
     done
 }
@@ -103,7 +103,7 @@ function base::check_dependencies() {
 
 # Module-level code
 
-ROOT=$(dirname "$0")
+ROOT=$(dirname "${BASH_SOURCE[0]}")
 JSON="${ROOT}/config.json"
 
 REQS=(
