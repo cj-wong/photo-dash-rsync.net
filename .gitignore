@@ -7,5 +7,6 @@
 *.pyc
 
 # Project-specific files
+config.sh
 config.json
 quiet_hours.json
