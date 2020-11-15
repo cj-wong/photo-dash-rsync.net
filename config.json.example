@@ -1,3 +1,5 @@
 {
+    "ssh_host": "rsync.net",
+    "ssh_user": "user",
     "endpoint": "w.x.y.z:8000"
 }
