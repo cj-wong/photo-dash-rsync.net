@@ -70,7 +70,7 @@ function base::check_apps() {
     errors=0
     for req in "${REQS[@]}"; do
         if ! command -v "$req" > /dev/null 2>&1; then
-            echo "${req} is not installed."
+            echo "${req} is not installed." >&2
             errors=1
         fi
     done
@@ -88,10 +88,10 @@ function base::check_apps() {
 #   1: otherwise
 function base::check_dependencies() {
     if ! base::check_apps; then
-        echo "One or more required apps are not installed."
+        echo "One or more required apps are not installed." >&2
         PD=1
     elif [ ! -f "$JSON" ]; then
-        echo "config.json was not found."
+        echo "config.json was not found." >&2
         PD=1
     else
         PD=0
