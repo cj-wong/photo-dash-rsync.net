@@ -18,7 +18,7 @@ function base::setup_quiet_hours() {
 # Load quiet hours into variables with the same name as their origin keys.
 # This function may fail if the quiet hours endpoint returns an invalid JSON.
 # Globals:
-#   JSON: ${ROOT}/quiet_hours.json
+#   QUIET_HOURS: ${ROOT}/quiet_hours.json
 #   QUIET_START: integer; when quiet hours begin
 #   QUIET_END: integer; when quiet hours stop
 # Arguments:
@@ -46,6 +46,14 @@ function base::load_quiet_hours() {
 function base::in_quiet_hours() {
     local hour
     hour=$(date +'%H')
+    if [[ -z "${QUIET_START+x}" || -z "${QUIET_START+x}" ]]; then
+        if [ -f "$QUIET_HOURS" ]; then
+            base::load_quiet_hours
+        else
+            return 1
+        fi
+    fi
+
     if [ "$QUIET_START" -gt "$QUIET_END" ]; then
         if [[ "$hour" -ge "$QUIET_START" || "$hour" -lt "$QUIET_END" ]]; then
             return 0
@@ -113,7 +121,10 @@ REQS=(
 )
 
 if ! base::check_dependencies; then
-    echo "Dependencies and/or files are missing."
+    echo "Dependencies and/or files are missing." >&2
+elif base::in_quiet_hours; then
+    echo "Currently in quiet hours. Skipping."
+    export PD=1
 else
     ENDPOINT=$(jq -r '.endpoint' "$JSON")
     base::setup_quiet_hours
