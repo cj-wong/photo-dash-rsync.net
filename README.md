@@ -1,45 +1,37 @@
-# base.sh module for photo-dash
+# [rsync.net] for photo-dash
 
 ## Overview
 
-The `photo-dash` project is a series of modules and an endpoint. This repository specifically is the base module in Bash (shell script) from which all other Bash-based scripts or modules should source.
-
-[base.sh] is provided to be sourced by a new module.
-
-For running new scripts, `cron` is recommended - instead of looping within the script, have `cron` call the script whenever needed.
+The `photo-dash` project is a series of modules and an endpoint. This repository specifically features some integration with [rsync.net], specifically in regards to quotas.
 
 ## Usage
 
-Clone (and fork) the repository to create modules in Bash for `photo-dash`.
+After [setup](#setup), run [photo-dash-rsync.net.sh].
 
 ## Requirements
 
 This code is designed around the following:
 
 - Bash
+- `bc`: math
 - `curl`: requests
 - `jq`: JSON parsing
+- `ssh` should already be set up with password-less login, ideally restricting a key to only call the `quota` command
+    - have a look at the [example](resources/authorized_keys) for ideas
 
 ## Setup
 
-0. Make sure both `curl` and `jq` are installed.
-1. You should make changes as needed to the provided [configuration](config.json.example) to suit the new script/module. Any additions here should also be reflected in `config.sh`, which sits on the same level as the other files here. A snippet at the bottom of [base.sh] includes support for this file should it exist (i.e. `base.sh` will source it).
-2. When creating your script/module, you may start with the given [example]. You should change `$name`, specifically removing any mention of `EXAMPLE`. Also, wherever colons (`:`) are listed, your code should go there. The colons are simply placeholders for content.
-3. To send a request, use the format:
-
-```bash
-curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" \
-    -d "{'module': '${name}', 'title': '${title}', 'sections': ${sections}}"
-```
-
-- `$ENDPOINT` is defined in [base.sh].
-- `$name` is defined in your script, at the top. It's also present in the [example].
-- `$title` is like `$name`: defined in your script and also in the example.
-- `$sections` should be a JSON created in your script. It is up to you to define what to send to the endpoint.
+0. Make sure both `bc`, `curl`, and `jq` are installed on your local machine. You should also already have `ssh` installed and set up on the [rsync.net] host. You may restrict the command for your key to only call `quota`. You should also add an entry to `~/.ssh/config` for quicker access.
+1. Copy and rename the [configuration](config.json.example) to `config.json`. Both `ssh_host` and `endpoint` are not optional; `ssh_user` is optional. `ssh_host` is your host but can be represented in `~/.ssh/config`, a more granular approach to host management.
+2. Try attempting to the host, preferably with a command like this: `ssh rsync.net quota`. You will need to accept the [fingerprint] before your command will continue. If you plan to run this automatically, also make sure that password-less login works.
+3. Run [photo-dash-rsync.net.sh], preferably with `cron`.
 
 ## Disclaimer
 
-See [LICENSE](LICENSE) for more detail.
+This project is not affiliated with or endorsed by [rsync.net]. See [LICENSE](LICENSE) for more detail.
 
+[rsync.net]: https://www.rsync.net
+[fingerprint]: https://www.rsync.net/resources/fingerprints.txt
 [base.sh]: base.sh
 [example]: example.sh
+[photo-dash-rsync.net.sh]: photo-dash-rsync.net.sh
