@@ -140,6 +140,9 @@ title="rsync.net Storage Statistics"
 if [[ -z "${PD+x}" || "$PD" != 0 ]]; then
     echo "You have problems with your configuration. Aborting ${name}." >&2
     exit 1
+elif base::in_quiet_hours; then
+    echo "Currently in quiet hours. Skipping."
+    exit 0
 fi
 
 # The rest of your script goes here, as needed.
@@ -149,10 +152,5 @@ if ! JSON=$(rsync.net::quota_to_json "$quota"); then
     echo "Could not generate JSON." >&2
     exit 1
 else
-    if base::in_quiet_hours; then
-        echo "Currently in quiet hours. Skipping."
-        return 0
-    else
-        curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
-    fi
+    curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
 fi
