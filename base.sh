@@ -11,7 +11,7 @@
 #   0: if curl succeeded
 #   any other integer: depends on curl's exit status
 function base::setup_quiet_hours() {
-    curl "${ENDPOINT}/quiet" --output "${ROOT}/quiet_hours.json"
+    curl "${ENDPOINT}/quiet" --output "$QUIET_HOURS"
     base::load_quiet_hours
 }
 
@@ -30,7 +30,7 @@ function base::load_quiet_hours() {
     local point
     for point in "quiet_start" "quiet_end"; do
         point_upper=$(echo "$point" | tr '[:lower:]' '[:upper:]')
-        declare -g "$point_upper=$(jq -r ".${point}" "${ROOT}/quiet_hours.json")"
+        declare -g "$point_upper=$(jq -r ".${point}" "$QUIET_HOURS")"
     done
 }
 
@@ -105,6 +105,7 @@ function base::check_dependencies() {
 
 ROOT=$(dirname "${BASH_SOURCE[0]}")
 JSON="${ROOT}/config.json"
+QUIET_HOURS="${ROOT}/quiet_hours.json"
 
 REQS=(
     curl
