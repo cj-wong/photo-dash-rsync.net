@@ -100,7 +100,7 @@ END
     sections=$(echo "$sections" | jq ".sections|= .+ ${section}")
 
     # Add sections to main JSON
-    json=$(jq -n '{name: $name, title: $title}' \
+    json=$(jq -n '{module: $name, title: $title}' \
         --arg name "$name" \
         --arg title "$title")
 
