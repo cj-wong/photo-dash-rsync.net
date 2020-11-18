@@ -116,9 +116,9 @@ if ! base::check_dependencies; then
 else
     ENDPOINT=$(jq -r '.endpoint' "$JSON")
     base::setup_quiet_hours
-fi
 
-# Additional configuration may be listed below, or sourced from another file
-if [ -f "${ROOT}/config.sh" ]; then
-    . "${ROOT}/config.sh"
+    # Additional configuration may be listed below, or sourced from another file
+    if [ -f "${ROOT}/config.sh" ]; then
+        . "${ROOT}/config.sh"
+    fi
 fi
