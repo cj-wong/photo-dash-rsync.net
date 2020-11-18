@@ -1,4 +1,4 @@
-# [rsync.net] for photo-dash
+# [rsync.net] for [photo-dash]
 
 ## Overview
 
@@ -30,6 +30,7 @@ This code is designed around the following:
 
 This project is not affiliated with or endorsed by [rsync.net]. See [LICENSE](LICENSE) for more detail.
 
+[photo-dash]: https://github.com/cj-wong/photo-dash
 [rsync.net]: https://www.rsync.net
 [fingerprint]: https://www.rsync.net/resources/fingerprints.txt
 [base.sh]: base.sh
