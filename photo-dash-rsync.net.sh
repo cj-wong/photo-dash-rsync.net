@@ -43,9 +43,9 @@ function rsync.net::quota_to_json() {
     hard_quota=$(echo "$line" | cut -d' ' -f4)
     percent_used=$(echo "scale=3; ${usage}*100/${soft_quota}" | bc \
         | sed -E 's/^(-?)\./\10./')
-    if [[ "$percent_used" -lt 50 ]]; then
+    if less_than "$percent_used" 50; then
         color="${colors[0]}"
-    elif [[ "$percent_used" -lt 100 ]]; then
+    elif less_than "$percent_used" 100; then
         color="${colors[1]}"
     else
         color="${colors[2]}"
@@ -108,6 +108,21 @@ END
     echo "$json" | jq ".sections|= $sections"
 }
 
+# Process the quota to JSON
+# Globals:
+# Arguments:
+#   $1: left operand
+#   $2: right operand
+# Returns:
+#   any: depends on jq and the quota message
+function less_than() {
+    if [[ $(echo "${1} < ${2}" | bc) == 1 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Module-level code
 
 colors=(
@@ -130,6 +145,9 @@ fi
 # The rest of your script goes here, as needed.
 
 quota=$(rsync.net::get_quota "$USER_HOST")
-JSON=$(rsync.net::quota_to_json "$quota")
-
-curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
+if ! JSON=$(rsync.net::quota_to_json "$quota"); then
+    echo "Could not generate JSON." >&2
+    exit 1
+else
+    curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
+fi
