@@ -30,7 +30,7 @@ function base::load_quiet_hours() {
     local point
     for point in "quiet_start" "quiet_end"; do
         point_upper=$(echo "$point" | tr '[:lower:]' '[:upper:]')
-        declare "$point_upper=$(jq -r ".${point}" "${ROOT}/quiet_hours.json")"
+        declare -g "$point_upper=$(jq -r ".${point}" "${ROOT}/quiet_hours.json")"
     done
 }
 
