@@ -53,7 +53,7 @@ function rsync.net::quota_to_json() {
     files=$(echo "$line" | cut -d' ' -f5)
 
     # Section 1: Text
-    value="Current usage (GB): ${usage} / ${soft_quota} (limit: ${hard_quota}"
+    value="Current usage (GB): ${usage} / ${soft_quota} (limit: ${hard_quota})"
     sections=$(jq -n 'inputs' << END
 {
     "sections": [
@@ -149,5 +149,10 @@ if ! JSON=$(rsync.net::quota_to_json "$quota"); then
     echo "Could not generate JSON." >&2
     exit 1
 else
-    curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
+    if base::in_quiet_hours; then
+        echo "Currently in quiet hours. Skipping."
+        return 0
+    else
+        curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
+    fi
 fi
