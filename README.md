@@ -23,7 +23,7 @@ This code is designed around the following:
 
 0. Make sure both `bc`, `curl`, and `jq` are installed on your local machine. You should also already have `ssh` installed and set up on the [rsync.net] host. You may restrict the command for your key to only call `quota`. You should also add an entry to `~/.ssh/config` for quicker access.
 1. Copy and rename the [configuration](config.json.example) to `config.json`. Both `ssh_host` and `endpoint` are not optional; `ssh_user` is optional. `ssh_host` is your host but can be represented in `~/.ssh/config`, a more granular approach to host management.
-2. Try attempting to the host, preferably with a command like this: `ssh rsync.net quota`. You will need to accept the [fingerprint] before your command will continue. If you plan to run this automatically, also make sure that password-less login works.
+2. Try connecting to the host, preferably with a command like this: `ssh rsync.net quota`. (In this example, `rsync.net` is a host configuration with user and server defined.) You will need to accept the [fingerprint] before your command will continue. If you plan to run this automatically, also make sure that password-less login works.
 3. Run [photo-dash-rsync.net.sh], preferably with `cron`.
 
 ## Disclaimer
