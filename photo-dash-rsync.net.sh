@@ -4,7 +4,7 @@
 
 # Functions should go between here and the module-level code
 
-# Get quota from rsync.net via ssh
+# Get quota from rsync.net via ssh.
 # Globals:
 # Arguments:
 #   $1: either user@host or only host
@@ -14,8 +14,11 @@ function rsync.net::get_quota() {
     ssh "$1" quota
 }
 
-# Process the quota to JSON
+# Process the quota to JSON.
 # Globals:
+#   colors: a bash array of colors
+#   name: name of the module, i.e. photo-dash-rsync.net
+#   title: title of the dash image
 # Arguments:
 #   $1: the full quota text
 # Returns:
@@ -35,7 +38,6 @@ function rsync.net::quota_to_json() {
     local value # The "value" field
     local range # Range for gauge section
     local color_arr # Array of $colors
-    local IFS # Separator
     line=$(echo "$1" | tail -n1 | sed 's/[\tG]/ /g' | tr -s ' ')
     usage=$(echo "$line" | cut -d' ' -f2)
     soft_quota=$(echo "$line" | cut -d' ' -f3)
@@ -55,15 +57,13 @@ function rsync.net::quota_to_json() {
     # Section 1: Text
     value="Current usage (GB): ${usage} / ${soft_quota} (limit: ${hard_quota})"
     sections=$(jq -n 'inputs' << END
-{
-    "sections": [
-        {
-            "type": "text",
-            "color": "$color",
-            "value": "$value"
-        }
-    ]
-}
+[
+    {
+        "type": "text",
+        "color": "$color",
+        "value": "$value"
+    }
+]
 END
         )
 
@@ -80,25 +80,26 @@ END
 ]
 END
     )
-    sections=$(echo "$sections" | jq ".sections|= .+ ${section}")
+    sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
     # Section 3: Gauge
     value="$usage"
     range="[0, $half_quota, $soft_quota, $hard_quota]"
-    color_arr=$(IFS=',' && echo "${color[*]}")
+    color_arr=$(array_bash_to_json colors)
     section=$(jq -n 'inputs' << END
 [
     {
         "type": "gauge",
-        "color": "$color_arr",
-        "range": "$range",
-        "value": "$value"
+        "color": $color_arr,
+        "range": $range,
+        "value": $value
     }
 ]
 END
     )
-    sections=$(echo "$sections" | jq ".sections|= .+ ${section}")
+    sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
+    
     # Add sections to main JSON
     json=$(jq -n '{module: $name, title: $title}' \
         --arg name "$name" \
@@ -108,13 +109,15 @@ END
     echo "$json" | jq ".sections|= $sections"
 }
 
-# Process the quota to JSON
+# Determine whether a number is less than another. Supports floating point.
 # Globals:
+#   None
 # Arguments:
 #   $1: left operand
 #   $2: right operand
 # Returns:
-#   any: depends on jq and the quota message
+#   0: if left operand is less than right operand
+#   1: if left operand is greater than or equal to right operand
 function less_than() {
     if [[ $(echo "${1} < ${2}" | bc) == 1 ]]; then
         return 0
@@ -122,6 +125,26 @@ function less_than() {
         return 1
     fi
 }
+
+# Convert a bash array to JSON array.
+# Globals:
+#   None
+# Arguments:
+#   $1: left operand
+# Returns:
+#   any: depends on jq and the array contents
+function array_bash_to_json() {
+    local -n src="$1"
+    local dest
+    local el
+    dest=$(jq -n '[]') # Create an empty array
+    for el in "${src[@]}"; do
+        dest=$(echo "$dest" | jq ".|= .+ [\"$el\"]")
+    done
+
+    echo "$dest"
+}
+
 
 # Module-level code
 
