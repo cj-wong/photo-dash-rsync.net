@@ -38,7 +38,7 @@ function rsync.net::quota_to_json() {
     local value # The "value" field
     local range # Range for gauge section
     local color_arr # Array of $colors
-    line=$(echo "$1" | tail -n1 | sed 's/[\tG]/ /g' | tr -s ' ')
+    line=$(echo "$1" | tail -n +3 | head -n -3 | sed 's/[\tG]/ /g' | tr -s ' ')
     usage=$(echo "$line" | cut -d' ' -f2)
     soft_quota=$(echo "$line" | cut -d' ' -f3)
     half_quota=$(echo "scale=1; ${soft_quota}/2" | bc)
