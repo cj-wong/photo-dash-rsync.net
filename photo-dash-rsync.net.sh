@@ -20,7 +20,7 @@ function rsync.net::get_quota() {
 #   name: name of the module, i.e. photo-dash-rsync.net
 #   title: title of the dash image
 # Arguments:
-#   $1: the full quota text
+#   $1: a filesystem's quota
 # Returns:
 #   any: depends on jq and the quota message
 function rsync.net::quota_to_json() {
@@ -38,7 +38,7 @@ function rsync.net::quota_to_json() {
     local value # The "value" field
     local range # Range for gauge section
     local color_arr # Array of $colors
-    line=$(echo "$1" | tail -n +3 | head -n -3 | sed 's/[\tG]/ /g' | tr -s ' ')
+    line=$(echo "$1" | sed 's/[\tG]/ /g' | tr -s ' ')
     usage=$(echo "$line" | cut -d' ' -f2)
     soft_quota=$(echo "$line" | cut -d' ' -f3)
     half_quota=$(echo "scale=1; ${soft_quota}/2" | bc)
@@ -171,9 +171,15 @@ fi
 # The rest of your script goes here, as needed.
 
 quota=$(rsync.net::get_quota "$USER_HOST")
-if ! JSON=$(rsync.net::quota_to_json "$quota"); then
-    echo "Could not generate JSON." >&2
-    exit 1
-else
-    curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
-fi
+systems=$(echo "$quota" \
+    | grep -E "^[^ ]+[[:space:]]+([0-9\.]+[[:space:]]*){1,}$")
+while read -r system; do
+    if ! JSON=$(rsync.net::quota_to_json "$system"); then
+        echo "Could not generate JSON." >&2
+        continue
+    else
+        curl -X PUT -H 'Content-Type: application/json' "$ENDPOINT" -d "$JSON"
+        # Minimize spamming the endpoint with a sleep.
+        sleep 10
+    fi
+done <<< "$systems"
