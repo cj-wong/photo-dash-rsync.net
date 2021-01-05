@@ -11,7 +11,7 @@
 #   0: if curl succeeded
 #   any other integer: depends on curl's exit status
 function base::setup_quiet_hours() {
-    curl "${ENDPOINT}/quiet" --output "$QUIET_HOURS"
+    curl --silent --show-error "${ENDPOINT}/quiet" --output "$QUIET_HOURS"
     base::load_quiet_hours
 }
 
