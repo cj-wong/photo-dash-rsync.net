@@ -3,10 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [0.1.3] - 2021-01-05
+## [0.2.0] - 2021-01-05
 ### Changed
 - As a result of issue #1, multiple filesystems, if present, are now supported.
 - The exit code for the script no longer depends on JSON parsing. Failed parses are simply skipped.
+- The text elements in JSON are now broken into more lines to reduce cluttering. The total number of lines now, excluding the gauge, is now 4 (previously 2); altogether, that's 6 lines of data.
 
 ### Fixed
 - Issue #1:

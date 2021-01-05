@@ -26,7 +26,7 @@ function rsync.net::get_quota() {
 #   any: depends on jq and the quota message
 function rsync.net::quota_to_json() {
     local line # Initial line extracted from output
-    local fs # Filesystem of the input
+    local fs # Filesystem name of the input
     local usage # Current usage
     local soft_quota # Maximum allotted storage
     local half_quota # Half of maximum allotted storage
@@ -46,6 +46,7 @@ function rsync.net::quota_to_json() {
     soft_quota=$(echo "$line" | cut -d' ' -f3)
     half_quota=$(echo "scale=1; ${soft_quota}/2" | bc)
     hard_quota=$(echo "$line" | cut -d' ' -f4)
+    # Set the color of some text elements relative to percent used.
     percent_used=$(echo "scale=3; ${usage}*100/${soft_quota}" | bc \
         | sed -E 's/^(-?)\./\10./')
     if less_than "$percent_used" 50; then
@@ -57,21 +58,37 @@ function rsync.net::quota_to_json() {
     fi
     files=$(echo "$line" | cut -d' ' -f5)
 
-    # Section 1: Text
-    value="Current usage (GB): ${usage} / ${soft_quota} (limit: ${hard_quota})"
+    # Section 1: Text, usage
+    value="Current usage [GB]: ${usage} GB"
     sections=$(jq -n 'inputs' << END
 [
     {
         "type": "text",
-        "color": "$color",
+        "color": "#FFFFFF",
         "value": "$value"
     }
+
 ]
 END
-        )
+    )
 
-    # Section 2: Text
-    value="Files in storage: ${files} | Percent usage: ${percent_used}%"
+    # Section 2: Text, limits
+    value="Limits: ${soft_quota} (${hard_quota}) GB"
+    section=$(jq -n 'inputs' << END
+[
+    {
+        "type": "text",
+        "color": "#FFFFFF",
+        "value": "$value"
+    }
+
+]
+END
+    )
+    sections=$(echo "$sections" | jq ".|= .+ ${section}")
+
+    # Section 3: Text, percentage used
+    value="Percent usage: ${percent_used}%"
     section=$(jq -n 'inputs' << END
 [
     {
@@ -85,7 +102,22 @@ END
     )
     sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
-    # Section 3: Gauge
+    # Section 4: Text, number of files
+    value="Files: ${files}"
+    section=$(jq -n 'inputs' << END
+[
+    {
+        "type": "text",
+        "color": "#FFFFFF",
+        "value": "$value"
+    }
+
+]
+END
+    )
+    sections=$(echo "$sections" | jq ".|= .+ ${section}")
+
+    # Section 5: Gauge
     value="$usage"
     range="[0, $half_quota, $soft_quota, $hard_quota]"
     color_arr=$(array_bash_to_json COLORS)
@@ -102,13 +134,12 @@ END
     )
     sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
-    
     # Add sections to main JSON
     json=$(jq -n '{module: $name, title: $title}' \
         --arg name "$NAME" \
         --arg title "${TITLE} [${fs}]")
 
-    # Complete response sent to stdout
+    # Send JSON payload to stdout
     echo "$json" | jq ".sections|= $sections"
 }
 
