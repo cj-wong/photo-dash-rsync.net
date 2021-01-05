@@ -6,6 +6,7 @@
 
 # Get quota from rsync.net via ssh.
 # Globals:
+#   None
 # Arguments:
 #   $1: either user@host or only host
 # Returns:
@@ -16,15 +17,16 @@ function rsync.net::get_quota() {
 
 # Process the quota to JSON.
 # Globals:
-#   colors: a bash array of colors
-#   name: name of the module, i.e. photo-dash-rsync.net
-#   title: title of the dash image
+#   COLORS: a bash array of colors
+#   NAME: name of the module, i.e. photo-dash-rsync.net
+#   TITLE: title of the dash image
 # Arguments:
 #   $1: a filesystem's quota
 # Returns:
 #   any: depends on jq and the quota message
 function rsync.net::quota_to_json() {
     local line # Initial line extracted from output
+    local fs # Filesystem of the input
     local usage # Current usage
     local soft_quota # Maximum allotted storage
     local half_quota # Half of maximum allotted storage
@@ -37,8 +39,9 @@ function rsync.net::quota_to_json() {
     local sections # All the sections combined
     local value # The "value" field
     local range # Range for gauge section
-    local color_arr # Array of $colors
+    local color_arr # Array of $COLORS
     line=$(echo "$1" | sed 's/[\tG]/ /g' | tr -s ' ')
+    fs=$(echo "$line" | cut -d' ' -f1)
     usage=$(echo "$line" | cut -d' ' -f2)
     soft_quota=$(echo "$line" | cut -d' ' -f3)
     half_quota=$(echo "scale=1; ${soft_quota}/2" | bc)
@@ -46,11 +49,11 @@ function rsync.net::quota_to_json() {
     percent_used=$(echo "scale=3; ${usage}*100/${soft_quota}" | bc \
         | sed -E 's/^(-?)\./\10./')
     if less_than "$percent_used" 50; then
-        color="${colors[0]}"
+        color="${COLORS[0]}"
     elif less_than "$percent_used" 100; then
-        color="${colors[1]}"
+        color="${COLORS[1]}"
     else
-        color="${colors[2]}"
+        color="${COLORS[2]}"
     fi
     files=$(echo "$line" | cut -d' ' -f5)
 
@@ -85,7 +88,7 @@ END
     # Section 3: Gauge
     value="$usage"
     range="[0, $half_quota, $soft_quota, $hard_quota]"
-    color_arr=$(array_bash_to_json colors)
+    color_arr=$(array_bash_to_json COLORS)
     section=$(jq -n 'inputs' << END
 [
     {
@@ -102,8 +105,8 @@ END
     
     # Add sections to main JSON
     json=$(jq -n '{module: $name, title: $title}' \
-        --arg name "$name" \
-        --arg title "$title")
+        --arg name "$NAME" \
+        --arg title "${TITLE} [${fs}]")
 
     # Complete response sent to stdout
     echo "$json" | jq ".sections|= $sections"
@@ -148,7 +151,7 @@ function array_bash_to_json() {
 
 # Module-level code
 
-colors=(
+COLORS=(
     '#00FF00'
     '#FFFF00'
     '#FF0000'
@@ -157,11 +160,11 @@ colors=(
 root=$(dirname "$0")
 . "${root}/base.sh"
 
-name="photo-dash-rsync.net"
-title="rsync.net Storage Statistics"
+NAME="photo-dash-rsync.net"
+TITLE="rsync.net Storage Statistics"
 
 if [[ -z "${PD+x}" || "$PD" != 0 ]]; then
-    echo "You have problems with your configuration. Aborting ${name}." >&2
+    echo "You have problems with your configuration. Aborting ${NAME}." >&2
     exit 1
 elif base::in_quiet_hours; then
     echo "Currently in quiet hours. Skipping."
