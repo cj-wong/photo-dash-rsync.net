@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.1.3] - 2021-01-05
+### Changed
+- As a result of issue #1, multiple filesystems, if present, are now supported.
+- The exit code for the script no longer depends on JSON parsing. Failed parses are simply skipped.
+
+### Fixed
+- Issue #1:
+    - The `quota` command output should no longer affect (read: break) JSON creation.
+
 ## [0.1.2] - 2020-12-07
 ### Fixed
 - Fixed JSON parse issue after `quota` syntax changed
