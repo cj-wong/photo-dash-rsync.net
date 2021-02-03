@@ -1,4 +1,4 @@
-# [rsync.net] for [photo-dash]
+# Info from [rsync.net] for [photo-dash]
 
 ## Overview
 

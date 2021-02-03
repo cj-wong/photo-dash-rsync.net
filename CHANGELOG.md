@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.1] - 2021-02-02
+### Added
+- Added last 3 digits of account to each image as necessary, in the header.
+
+### Fixed
+- Issue #2: The script now uses the right unit, instead of the hard-coded `GB`.
+- Issue #3: The JSON payload now uses the last 3 digits of account and the filesystem name to ensure each account and its respective filesystems can be represented with an image.
+    - A caveat to this change is that the old `photo-dash-rsync.net.jpg` on `photo-dash`'s end will have to be deleted, or else the file will remain on the photo frame.
+
 ## [0.2.0] - 2021-01-05
 ### Changed
 - As a result of issue #1, multiple filesystems, if present, are now supported.
