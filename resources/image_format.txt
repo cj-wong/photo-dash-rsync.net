@@ -1,0 +1,9 @@
+rsync.net Storage Statistics [${fs}]
+
+Current usage [{$unit}]: ${usage} GB
+Limits        [{$unit}]: ${soft_quota} (${hard_quota})
+Percent usage     : ${percent_used}%
+Files             : ${files}
+
+0       ${half_quota}     ${soft_quota}   ${hard_quota}
+ iiiiiiiiiiiiiillllllllllllllllll||||||||||||||||
