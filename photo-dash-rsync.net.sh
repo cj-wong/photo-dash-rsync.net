@@ -59,7 +59,7 @@ function rsync.net::quota_to_json() {
     files=$(echo "$line" | cut -d' ' -f5)
 
     # Section 1: Text, usage
-    value="Current usage [GB]: ${usage} GB"
+    value="Current usage [${unit}]: ${usage}"
     sections=$(jq -n 'inputs' << END
 [
     {
@@ -73,7 +73,7 @@ END
     )
 
     # Section 2: Text, limits
-    value="Limits: ${soft_quota} (${hard_quota}) GB"
+    value="Limits        [${unit}]: ${soft_quota} (${hard_quota})"
     section=$(jq -n 'inputs' << END
 [
     {
@@ -88,7 +88,7 @@ END
     sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
     # Section 3: Text, percentage used
-    value="Percent usage: ${percent_used}%"
+    value="Percent usage     : ${percent_used}%"
     section=$(jq -n 'inputs' << END
 [
     {
@@ -103,7 +103,7 @@ END
     sections=$(echo "$sections" | jq ".|= .+ ${section}")
 
     # Section 4: Text, number of files
-    value="Files: ${files}"
+    value="Files             : ${files}"
     section=$(jq -n 'inputs' << END
 [
     {
@@ -207,6 +207,7 @@ fi
 quota=$(rsync.net::get_quota "$USER_HOST")
 systems=$(echo "$quota" \
     | grep -E "^[^ ]+[[:space:]]+([0-9\.]+[[:space:]]*){1,}$")
+unit=$(echo "$quota" | grep "^ \*" | rev | cut --delimiter=' ' --fields=1 | rev)
 while read -r system; do
     if ! JSON=$(rsync.net::quota_to_json "$system"); then
         echo "Could not generate JSON." >&2
