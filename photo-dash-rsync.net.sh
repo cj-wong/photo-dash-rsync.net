@@ -136,8 +136,8 @@ END
 
     # Add sections to main JSON
     json=$(jq -n '{module: $name, title: $title}' \
-        --arg name "$NAME" \
-        --arg title "${TITLE} [${fs}]")
+        --arg name "${NAME}-${account}_${fs}" \
+        --arg title "${TITLE} [**${account}] [${fs}]")
 
     # Send JSON payload to stdout
     echo "$json" | jq ".sections|= $sections"
@@ -192,7 +192,7 @@ root=$(dirname "$0")
 . "${root}/base.sh"
 
 NAME="photo-dash-rsync.net"
-TITLE="rsync.net Storage Statistics"
+TITLE="rsync.net Storage"
 
 if [[ -z "${PD+x}" || "$PD" != 0 ]]; then
     echo "You have problems with your configuration. Aborting ${NAME}." >&2
@@ -207,6 +207,10 @@ fi
 quota=$(rsync.net::get_quota "$USER_HOST")
 systems=$(echo "$quota" \
     | grep -E "^[^ ]+[[:space:]]+([0-9\.]+[[:space:]]*){1,}$")
+# Extract only last 3 digits of account number.
+account=$(echo "$quota" \
+    | head --lines=1 | rev | cut --delimiter=' ' --fields=1 \
+    | grep -E --only-matching '[0-9]{3}' | rev)
 unit=$(echo "$quota" | grep "^ \*" | rev | cut --delimiter=' ' --fields=1 | rev)
 while read -r system; do
     if ! JSON=$(rsync.net::quota_to_json "$system"); then
