@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.2] - 2021-02-03
+### Fixed
+- Fixed unit for quota not being properly retrieved.
+
 ## [0.2.1] - 2021-02-02
 ### Added
 - Added last 3 digits of account to each image as necessary, in the header.

@@ -211,7 +211,8 @@ systems=$(echo "$quota" \
 account=$(echo "$quota" \
     | head --lines=1 | rev | cut --delimiter=' ' --fields=1 \
     | grep -E --only-matching '[0-9]{3}' | rev)
-unit=$(echo "$quota" | grep "^ \*" | rev | cut --delimiter=' ' --fields=1 | rev)
+unit=$(echo "$quota" | grep -E "^ +\*" | rev \
+    | cut --delimiter=' ' --fields=1 | rev)
 while read -r system; do
     if ! JSON=$(rsync.net::quota_to_json "$system"); then
         echo "Could not generate JSON." >&2
