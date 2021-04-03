@@ -25,7 +25,7 @@ function config::ssh_args() {
 
 # Module-level code
 
-if [ -z "${ROOT+x}" ]; then
+if [ -z "${ROOT:+x}" ]; then
     ROOT=$(dirname "${BASH_SOURCE[0]}")
 fi
 
