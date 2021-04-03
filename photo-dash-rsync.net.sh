@@ -10,7 +10,7 @@
 # Arguments:
 #   $1: either user@host or only host
 # Returns:
-#   all return codes: depends on ssh
+#   0: ssh command successfully ran
 function rsync.net::get_quota() {
     ssh "$1" quota
 }
@@ -23,7 +23,8 @@ function rsync.net::get_quota() {
 # Arguments:
 #   $1: a filesystem's quota
 # Returns:
-#   any: depends on jq and the quota message
+#   0: JSON was successfully created
+#   json: the JSON payload to be sent to the endpoint
 function rsync.net::quota_to_json() {
     local line # Initial line extracted from output
     local fs # Filesystem name of the input
@@ -150,8 +151,8 @@ END
 #   $1: left operand
 #   $2: right operand
 # Returns:
-#   0: if left operand is less than right operand
-#   1: if left operand is greater than or equal to right operand
+#   0: left operand is less than right operand
+#   1: left operand is greater than or equal to right operand
 function less_than() {
     if [[ $(echo "${1} < ${2}" | bc) == 1 ]]; then
         return 0
@@ -166,7 +167,9 @@ function less_than() {
 # Arguments:
 #   $1: left operand
 # Returns:
-#   any: depends on jq and the array contents
+#   0: array was successfully converted
+# Outputs:
+#   dest: a JSON array created from a bash array
 function array_bash_to_json() {
     local -n src="$1"
     local dest

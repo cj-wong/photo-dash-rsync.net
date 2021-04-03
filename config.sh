@@ -8,8 +8,7 @@
 # Arguments:
 #   None
 # Returns:
-#   0: if arg generation succeeded
-#   any other integer: depends on the config file
+#   0: args were successfully created
 function config::ssh_args() {
     local user
     local host
