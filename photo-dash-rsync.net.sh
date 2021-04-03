@@ -194,7 +194,7 @@ root=$(dirname "$0")
 NAME="photo-dash-rsync.net"
 TITLE="rsync.net Storage"
 
-if [[ -z "${PD+x}" || "$PD" != 0 ]]; then
+if [[ -z "${PD:+x}" || "$PD" != 0 ]]; then
     echo "You have problems with your configuration. Aborting ${NAME}." >&2
     exit 1
 elif base::in_quiet_hours; then

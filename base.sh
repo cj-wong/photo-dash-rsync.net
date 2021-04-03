@@ -8,8 +8,7 @@
 # Arguments:
 #   None
 # Returns:
-#   0: if curl succeeded
-#   any other integer: depends on curl's exit status
+#   0: curl successfully ran
 function base::setup_quiet_hours() {
     curl --silent --show-error "${ENDPOINT}/quiet" --output "$QUIET_HOURS"
     base::load_quiet_hours
@@ -24,8 +23,7 @@ function base::setup_quiet_hours() {
 # Arguments:
 #   None
 # Returns:
-#   0: if no errors occurred
-#   any other integer: depends on jq's exit status
+#   0: variables were successfully loaded
 function base::load_quiet_hours() {
     local point
     for point in "quiet_start" "quiet_end"; do
@@ -41,12 +39,12 @@ function base::load_quiet_hours() {
 # Arguments:
 #   None
 # Returns:
-#   0: if within quiet hours
+#   0: currently within quiet hours
 #   1: otherwise
 function base::in_quiet_hours() {
     local hour
     hour=$(date +'%H')
-    if [[ -z "${QUIET_START+x}" || -z "${QUIET_START+x}" ]]; then
+    if [[ -z "${QUIET_START:+x}" || -z "${QUIET_END:+x}" ]]; then
         if [ -f "$QUIET_HOURS" ]; then
             base::load_quiet_hours
         else
@@ -71,7 +69,7 @@ function base::in_quiet_hours() {
 # Arguments:
 #   None
 # Returns:
-#   0: if all app dependencies are available
+#   0: all app dependencies are available
 #   1: otherwise
 function base::check_apps() {
     local errors
@@ -92,7 +90,7 @@ function base::check_apps() {
 # Arguments:
 #   None
 # Returns:
-#   0: if all dependencies and files are available
+#   0: all dependencies and files are available
 #   1: otherwise
 function base::check_dependencies() {
     if ! base::check_apps; then
