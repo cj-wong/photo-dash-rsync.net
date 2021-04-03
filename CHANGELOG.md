@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.3] - 2021-04-03
+### Changed
+- Cleaned up documentation (return codes).
+
+### Fixed
+- Fixed parameter substitution of `+x` in `[ -z "${matched_name+x}" ]` to `:+x`; this checks both whether `$matched_name` is empty and whether `$matched_name` was declared. Specifically, in the old syntax, if `$matched_name` was empty but declared, it would be substituted with `x`. In the new syntax, the substitution only takes place if `$matched_name` is empty (regardless of declaration).
+- Fixed incorrect condition `if [[ -z "${QUIET_START:+x}" || -z "${QUIET_START:+x}" ]]`: the second `QUIET_START` has been changed to `QUIET_END`.
+
 ## [0.2.2] - 2021-02-03
 ### Fixed
 - Fixed unit for quota not being properly retrieved.
